@@ -67,7 +67,7 @@ button,input,select,textarea{font:inherit}
 .form-grid{display:grid;grid-template-columns:28mm 1fr 29mm 1fr;column-gap:6px;row-gap:5px;align-items:center;margin-bottom:4px}
 .form-grid.first-info{grid-template-columns:24mm 1.55fr 27mm .85fr;column-gap:6px;row-gap:5px}
 .form-grid.wide{grid-template-columns:29mm 1fr}.form-grid.three{grid-template-columns:28mm 1fr 21mm 1fr 21mm 1fr}
-.label{font-family:var(--ui-font);font-size:8pt;font-weight:700;color:#344054;white-space:nowrap;align-self:start;padding-top:4px;line-height:1.25}
+.label{font-family:var(--ui-font);font-size:8pt;font-weight:700;color:#344054;white-space:normal;overflow-wrap:break-word;word-break:break-word;align-self:start;padding-top:4px;line-height:1.25}
 .input,.textarea,.select{width:100%;border:0;background:#f8fafc;border-radius:6px;padding:2px 7px;color:#111;outline:none;min-height:18px}
 .textarea{display:block;resize:none;overflow:hidden;line-height:1.15;min-height:12mm;padding-top:4px;padding-bottom:5px}
 .textarea.small{min-height:8mm}.textarea.medium{min-height:14mm}.textarea.large{min-height:22mm}
@@ -1923,110 +1923,6 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
   }
 }
 
-
-
-/* v62: print flow/footer/accounting label fixes
-   - Do not force the second document section to a new physical sheet; let it continue naturally if there is space.
-   - Make the page footer part of the normal print flow so overflowing text cannot collide with or cut through it.
-   - Add a clear print label above accounting/finance manager attendee rows. */
-.accounting-print-label{display:none;}
-@media print{
-  body.print-compact-layout .canvas,
-  body.mobile-pdf-compact .canvas{
-    display:block!important;
-    padding:0!important;
-    margin:0!important;
-    background:#fff!important;
-  }
-  body.print-compact-layout .page-wrap,
-  body.mobile-pdf-compact .page-wrap{
-    display:block!important;
-    margin:0!important;
-    padding:0!important;
-    break-before:auto!important;
-    break-after:auto!important;
-    page-break-before:auto!important;
-    page-break-after:auto!important;
-    break-inside:auto!important;
-    page-break-inside:auto!important;
-  }
-  body.print-compact-layout .page-wrap + .page-wrap,
-  body.mobile-pdf-compact .page-wrap + .page-wrap{
-    break-before:auto!important;
-    page-break-before:auto!important;
-  }
-  body.print-compact-layout .page,
-  body.mobile-pdf-compact .page{
-    width:210mm!important;
-    min-height:auto!important;
-    height:auto!important;
-    padding:10mm 14mm 8mm 15mm!important;
-    overflow:visible!important;
-    transform:none!important;
-    box-shadow:none!important;
-    border-radius:0!important;
-    margin:0!important;
-    page-break-after:auto!important;
-    break-after:auto!important;
-    position:relative!important;
-  }
-  body.print-compact-layout .page + .page,
-  body.mobile-pdf-compact .page + .page{
-    break-before:auto!important;
-    page-break-before:auto!important;
-  }
-  body.print-compact-layout #page2,
-  body.mobile-pdf-compact #page2{
-    padding-top:6mm!important;
-  }
-  body.print-compact-layout #page2 .doc-header.simple,
-  body.mobile-pdf-compact #page2 .doc-header.simple{
-    margin-top:0!important;
-    margin-bottom:7px!important;
-    padding-bottom:3px!important;
-  }
-  body.print-compact-layout .footer-note,
-  body.mobile-pdf-compact .footer-note{
-    position:static!important;
-    left:auto!important;
-    right:auto!important;
-    bottom:auto!important;
-    margin-top:6px!important;
-    padding-top:4px!important;
-    border-top:1px solid #ddd!important;
-    display:flex!important;
-    justify-content:flex-end!important;
-    color:#555!important;
-    font-size:7.5pt!important;
-    line-height:1.15!important;
-    break-inside:avoid!important;
-    page-break-inside:avoid!important;
-  }
-  body.print-compact-layout .section,
-  body.mobile-pdf-compact .section{
-    break-inside:auto!important;
-    page-break-inside:auto!important;
-  }
-  body.print-compact-layout .signature-grid,
-  body.mobile-pdf-compact .signature-grid{
-    break-inside:avoid!important;
-    page-break-inside:avoid!important;
-  }
-  body.print-compact-layout .accounting-print-label,
-  body.mobile-pdf-compact .accounting-print-label{
-    display:block!important;
-    font-size:8.5pt!important;
-    font-weight:700!important;
-    line-height:1.18!important;
-    margin:4px 0 2px 0!important;
-    color:#1f2937!important;
-  }
-  body.print-compact-layout .accounting-head,
-  body.mobile-pdf-compact .accounting-head{
-    margin-top:0!important;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -2118,7 +2014,6 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
         </div>
         <div id="noAccountingPrintStatus" class="print-status important-field">ไม่มีผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>
         <div id="accountingManagerBlock" class="accounting-manager-block">
-          <div class="accounting-print-label">ผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>
           <div class="person-head accounting-head" aria-hidden="true">
             <div></div><div></div><div class="h-name">ชื่อ-นามสกุล</div><div class="h-role">ตำแหน่ง</div><div class="h-age">อายุ</div><div class="h-decision">อำนาจตัดสินใจ</div><div></div>
           </div>
@@ -3092,7 +2987,7 @@ body{font-family:"Sarabun","TH SarabunPSK","TH Sarabun New",Tahoma,sans-serif;fo
 table{border-collapse:collapse;width:100%;table-layout:fixed;}
 td,th{padding:4px 5px;vertical-align:top;}
 th{font-size:9pt;color:#667085;font-weight:600;text-align:left;}
-.info td.label{width:24mm;font-weight:700;color:#344054;white-space:nowrap;}
+.info td.label{width:24mm;font-weight:700;color:#344054;white-space:normal;word-break:break-word;}
 .info td.field{background:#f8fafc;}
 .field{background:#f8fafc;font-weight:300;word-break:break-word;white-space:normal;}
 .center{text-align:center;}.num{width:8mm;text-align:center;font-weight:700;background:#fff;}.status{display:inline-block;background:#fff3cf;padding:2px 4px;font-weight:300;margin:3px 0;}
@@ -4380,6 +4275,42 @@ function cleanupPrintMode(){
   removePrintValueMirrors();
   removePrintHighlightMirrors();
 }
+// v62: คำนวณความสูงจริงของกระดาษ A4 หนึ่งแผ่นเป็น px ด้วย probe element
+// (ใช้ scrollHeight/probe แทนการ hardcode mm->px เพราะ transform:scale บนมือถือ
+// จะทำให้ getBoundingClientRect ของ .page ผิดได้ ส่วน scrollHeight ไม่ถูก transform กระทบ)
+function getPrintSheetHeightPx(){
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;visibility:hidden;height:297mm;width:0;top:0;left:0;pointer-events:none;';
+  document.body.appendChild(probe);
+  const px = probe.getBoundingClientRect().height || probe.offsetHeight || 0;
+  probe.remove();
+  return px;
+}
+// v62: เนื้อหายาว (เช่น log เจรจาหลายวัน) อาจทำให้ .page หนึ่งกล่อง (เช่น page1)
+// ไหลข้ามกระดาษจริงมากกว่า 1 แผ่น เลขหน้า "1/2" "2/2" แบบ hardcode เดิมจะผิด
+// ฟังก์ชันนี้วัดความสูงจริงของแต่ละ .page เทียบกับความสูง A4 หนึ่งแผ่น แล้วคำนวณ
+// "จำนวนแผ่นจริง" ของแต่ละ .page และเลขหน้ารวมทั้งฉบับ จากนั้นอัปเดตข้อความ footer
+// ให้ตรงความจริง (เช่น "หน้า 1-2/3" ถ้า page1 ไหลไป 2 แผ่น และฉบับนี้มีทั้งหมด 3 แผ่น)
+function updateDynamicPageNumbers(){
+  const pages = $$('.page');
+  if(!pages.length) return;
+  const sheetPx = getPrintSheetHeightPx();
+  if(!sheetPx) return;
+  const sheetsPerPage = pages.map(p => Math.max(1, Math.ceil(p.scrollHeight / sheetPx)));
+  const totalSheets = sheetsPerPage.reduce((a,b)=>a+b, 0);
+  let running = 0;
+  pages.forEach((p, i)=>{
+    const start = running + 1;
+    running += sheetsPerPage[i];
+    const end = running;
+    const label = (start === end) ? `หน้า ${start}/${totalSheets}` : `หน้า ${start}-${end}/${totalSheets}`;
+    const footerSpan = p.querySelector('.footer-note span');
+    if(footerSpan) footerSpan.textContent = label;
+    const wrap = p.closest('.page-wrap');
+    const labelSpans = wrap ? wrap.querySelectorAll('.page-label span') : null;
+    if(labelSpans && labelSpans[1]) labelSpans[1].textContent = label;
+  });
+}
 function preparePrintMode(options = {}){
   document.body.classList.remove('mobile-pdf-compact');
   const mobileSafe = !!options.mobileSafe || isMobileLikeDevice();
@@ -4392,17 +4323,21 @@ function preparePrintMode(options = {}){
     buildPrintValueMirrors();
     buildPrintControlMirrors();
     document.body.classList.add('mobile-print-safe');
+    updateDynamicPageNumbers();
     return;
   }
   preparePrintHighlightMode();
   buildPrintValueMirrors();
   buildPrintControlMirrors();
+  updateDynamicPageNumbers();
 }
 async function printDocument(){
   const oldTitle = document.title;
   document.title = sanitizeFilename(getReportFilenameBase());
-  syncBeforeDownloadOrPrint();
+  // v62: ต้องรอฟอนต์โหลดเสร็จก่อน autoResize/วัดความสูงหน้า ไม่งั้นความสูงที่วัดได้
+  // จะอิงฟอนต์ fallback (เช่น Tahoma) ที่ขนาดต่างจากฟอนต์จริง ทำให้กล่องข้อความ/เลขหน้าคลาดเคลื่อน
   await ensureFontsReady();
+  syncBeforeDownloadOrPrint();
   try{ window.print(); }catch(e){}
   setTimeout(()=>{ document.title = oldTitle; cleanupPrintMode(); }, isMobileLikeDevice() ? 1800 : 900);
 }
