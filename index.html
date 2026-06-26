@@ -4570,9 +4570,8 @@ window.addEventListener('beforeprint', ()=>{
   body.print-flow-v65 #dateCalendarOverlay{display:none!important;}
   body.print-flow-v65 #printDocRoot{display:block!important;}
   body.print-flow-v65 .pf-doc-v65{font-family:"Sarabun","TH SarabunPSK","TH Sarabun New",Tahoma,sans-serif!important;color:#111!important;font-size:10pt!important;line-height:1.42!important;font-weight:300!important;}
-  body.print-flow-v65 .pf-page{position:relative!important;box-sizing:border-box!important;min-height:268mm!important;padding:7mm 0 0 0!important;break-after:page!important;page-break-after:always!important;overflow:visible!important;}
+  body.print-flow-v65 .pf-page{position:relative!important;box-sizing:border-box!important;min-height:268mm!important;padding:0!important;break-after:page!important;page-break-after:always!important;overflow:visible!important;}
   body.print-flow-v65 .pf-page:last-child{break-after:auto!important;page-break-after:auto!important;}
-  body.print-flow-v65 .pf-footer{position:absolute!important;right:0!important;top:0!important;width:100%!important;text-align:right!important;font-size:8pt!important;line-height:1.2!important;color:#98a2b3!important;}
   body.print-flow-v65 .pf-header{display:grid!important;grid-template-columns:45mm 1fr 55mm!important;align-items:start!important;border-bottom:1.2px solid #111!important;padding-bottom:5px!important;margin-bottom:9px!important;}
   body.print-flow-v65 .pf-title{grid-column:2!important;text-align:center!important;font-size:16pt!important;font-weight:800!important;line-height:1.15!important;color:#111!important;}
   body.print-flow-v65 .pf-report-date{grid-column:3!important;text-align:right!important;font-size:9.5pt!important;line-height:1.35!important;}
@@ -4678,39 +4677,7 @@ window.addEventListener('beforeprint', ()=>{
     };
   }
   function page(content, reportDate){
-    return '<section class="pf-page"><div class="pf-header"><div class="pf-title">รายงานนัดหมาย</div><div class="pf-report-date"><b>วันที่รายงาน</b>' + e(reportDate) + '</div></div>' + content + '<div class="pf-footer"></div></section>';
-  }
-  // v65b: วัดความสูง A4 หนึ่งแผ่น "ที่พิมพ์ได้จริง" เป็น px ด้วย probe element
-  // หัก margin ของ @page (14mm บน + 14mm ล่าง ตาม @page ของ v65 ด้านบน) ออกจาก 297mm
-  // ใช้ probe แทน hardcode อัตราแปลง mm->px เพราะกันความเพี้ยนจาก zoom/scale ของ browser
-  function getV65SheetHeightPx(){
-    const probe = document.createElement('div');
-    probe.style.cssText = 'position:absolute;visibility:hidden;height:269mm;width:0;top:0;left:0;pointer-events:none;';
-    document.body.appendChild(probe);
-    const px = probe.getBoundingClientRect().height || probe.offsetHeight || 0;
-    probe.remove();
-    return px;
-  }
-  // v65b: เนื้อหายาว (เช่น log เจรจาหลายวัน) อาจทำให้ .pf-page หนึ่งกล่องไหลข้าม
-  // กระดาษจริงมากกว่า 1 แผ่น (เพราะ .pf-page เป็น min-height ไม่ใช่ height ตายตัว)
-  // ฟังก์ชันนี้วัดความสูงจริงของแต่ละ .pf-page หลัง render เทียบกับความสูง A4 ที่พิมพ์ได้จริง
-  // แล้วคำนวณเลขหน้าจริงของแต่ละแผ่น ก่อนเติมลง .pf-footer (แทนเลข 1/2, 2/2 ที่ฝังตายตัวแบบเดิม)
-  function updateV65PageNumbers(root){
-    const pages = root.querySelectorAll('.pf-page');
-    if(!pages.length) return;
-    const sheetPx = getV65SheetHeightPx();
-    if(!sheetPx) return;
-    const sheetsPerPage = Array.from(pages).map(p => Math.max(1, Math.ceil(p.scrollHeight / sheetPx)));
-    const totalSheets = sheetsPerPage.reduce((a,b)=>a+b, 0);
-    let running = 0;
-    pages.forEach((p, i)=>{
-      const start = running + 1;
-      running += sheetsPerPage[i];
-      const end = running;
-      const label = (start === end) ? `หน้า ${start}/${totalSheets}` : `หน้า ${start}-${end}/${totalSheets}`;
-      const footer = p.querySelector('.pf-footer');
-      if(footer) footer.textContent = label;
-    });
+    return '<section class="pf-page"><div class="pf-header"><div class="pf-title">รายงานนัดหมาย</div><div class="pf-report-date"><b>วันที่รายงาน</b>' + e(reportDate) + '</div></div>' + content + '</section>';
   }
   function buildV64PrintDoc(){
     safeOldCleanup();
@@ -4734,7 +4701,6 @@ window.addEventListener('beforeprint', ()=>{
     root.setAttribute('aria-hidden','false');
     document.body.classList.remove('print-flow-v63');
     document.body.classList.add('print-flow-v65');
-    updateV65PageNumbers(root);
   }
   function cleanupV64(){ document.body.classList.remove('print-flow-v65'); const root = document.getElementById('printDocRoot'); if(root){ root.innerHTML=''; root.setAttribute('aria-hidden','true'); } }
   // Remove v63 beforeprint listener and make older print mirror preparation harmless.
