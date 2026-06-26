@@ -2126,7 +2126,16 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
           <div class="label">เข้าโครงการได้</div>
           <input data-key="projectAmount" class="input amount-input important-field" inputmode="numeric" autocomplete="off" placeholder="เช่น 5,000,000">
           <div class="label">ผู้นัดหมาย</div>
-          <input data-key="setter" class="input" placeholder="ชื่อผู้นัดหมาย">
+          <div class="setter-field-wrap">
+            <select id="setterSelect" class="select setter-select" aria-label="ผู้นัดหมาย">
+              <option value="">เลือกผู้นัดหมาย</option>
+              <option value="ราณี (ต่าย)">ราณี (ต่าย)</option>
+              <option value="ชนิดาภา (เทียน)">ชนิดาภา (เทียน)</option>
+              <option value="ณัฐวรรณ (อีฟ)">ณัฐวรรณ (อีฟ)</option>
+              <option value="__other__">อื่น ๆ (กรอกเอง)</option>
+            </select>
+            <input id="setterOtherInput" data-key="setter" class="input setter-other-input" placeholder="กรอกชื่อผู้นัดหมายเอง">
+          </div>
           <div class="label">ผู้นำเสนอ</div>
           <input data-key="presenter" class="input" placeholder="ชื่อผู้นำเสนอ">
           <div class="label">วันนัดหมาย</div>
@@ -4834,6 +4843,146 @@ window.addEventListener('beforeprint', ()=>{
       oldApplyData(data);
       setTimeout(removePrefixInputs, 0);
       setTimeout(removePrefixInputs, 80);
+    };
+  }
+})();
+</script>
+
+
+
+<style id="v66-setter-dropdown-mobile-decision-style">
+/* v66: ผู้นัดหมาย dropdown + mobile decision layout fix */
+.setter-field-wrap{width:100%;display:flex;flex-direction:column;gap:6px;min-width:0;}
+.setter-field-wrap .setter-select,
+.setter-field-wrap .setter-other-input{width:100%;min-width:0;}
+.setter-field-wrap .setter-other-input.is-hidden{display:none!important;}
+@media screen and (max-width:820px){
+  .setter-field-wrap{gap:7px!important;}
+  .setter-field-wrap .setter-select,
+  .setter-field-wrap .setter-other-input{
+    width:100%!important;
+    min-height:46px!important;
+    font-size:16px!important;
+    line-height:1.45!important;
+    padding:11px 12px!important;
+    border:1px solid #d9dee8!important;
+    border-radius:12px!important;
+    background:#fff!important;
+    font-weight:300!important;
+  }
+  /* ให้ช่องอำนาจตัดสินใจลงมาอยู่ใต้ชื่อ/ตำแหน่ง/อายุ ไม่หลุดขวาจอ */
+  .person-row{
+    grid-template-columns:30px minmax(0,1fr) 42px!important;
+    gap:8px!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+  .person-row .person-index{grid-column:1!important;grid-row:1!important;align-self:center!important;}
+  .person-row .person-name{grid-column:2 / 4!important;grid-row:1!important;min-width:0!important;}
+  .person-row .person-role{grid-column:2 / 4!important;grid-row:2!important;min-width:0!important;}
+  .person-row .person-age{grid-column:2 / 4!important;grid-row:3!important;min-width:0!important;}
+  .person-row .decision{
+    grid-column:2 / 4!important;
+    grid-row:4!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    gap:10px 16px!important;
+    align-items:center!important;
+    overflow:visible!important;
+    white-space:normal!important;
+    padding:2px 0 0!important;
+  }
+  .person-row .decision .check{
+    white-space:nowrap!important;
+    flex:0 0 auto!important;
+  }
+  .person-row .icon-btn{grid-column:3!important;grid-row:1!important;justify-self:end!important;}
+}
+</style>
+<script id="v66-setter-dropdown-mobile-decision-script">
+(function(){
+  const PRESET_SETTERS = ['ราณี (ต่าย)','ชนิดาภา (เทียน)','ณัฐวรรณ (อีฟ)'];
+  function $(sel, root){ return (root || document).querySelector(sel); }
+  function getEls(){
+    return { select: $('#setterSelect'), input: $('#setterOtherInput') || $('[data-key="setter"]') };
+  }
+  function fire(el){
+    if(!el) return;
+    try{ el.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){}
+    try{ el.dispatchEvent(new Event('change', {bubbles:true})); }catch(e){}
+  }
+  function syncSetterFromSelect(){
+    const {select,input} = getEls();
+    if(!select || !input) return;
+    if(select.value === '__other__'){
+      input.classList.remove('is-hidden');
+      input.removeAttribute('readonly');
+      input.placeholder = 'กรอกชื่อผู้นัดหมายเอง';
+      input.focus && setTimeout(()=>{ try{ input.focus(); }catch(e){} }, 0);
+    }else{
+      input.classList.add('is-hidden');
+      input.value = select.value || '';
+      input.setAttribute('readonly','readonly');
+      fire(input);
+    }
+    try{ if(typeof syncMirrors === 'function') syncMirrors(); }catch(e){}
+  }
+  function syncSetterSelectFromInput(){
+    const {select,input} = getEls();
+    if(!select || !input) return;
+    const val = String(input.value || '').trim();
+    if(!val){
+      select.value = '';
+      input.classList.add('is-hidden');
+      input.setAttribute('readonly','readonly');
+    }else if(PRESET_SETTERS.includes(val)){
+      select.value = val;
+      input.classList.add('is-hidden');
+      input.setAttribute('readonly','readonly');
+    }else{
+      select.value = '__other__';
+      input.classList.remove('is-hidden');
+      input.removeAttribute('readonly');
+    }
+  }
+  function initSetterDropdown(){
+    const {select,input} = getEls();
+    if(!select || !input || select.dataset.boundSetter66 === '1') return;
+    select.dataset.boundSetter66 = '1';
+    syncSetterSelectFromInput();
+    select.addEventListener('change', syncSetterFromSelect);
+    select.addEventListener('input', syncSetterFromSelect);
+    input.addEventListener('input', function(){
+      if(select.value !== '__other__') return;
+      try{ if(typeof syncMirrors === 'function') syncMirrors(); }catch(e){}
+    });
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSetterDropdown);
+  initSetterDropdown();
+  setTimeout(initSetterDropdown, 0);
+  setTimeout(initSetterDropdown, 250);
+
+  const oldCollect = window.collectData;
+  if(typeof oldCollect === 'function'){
+    window.collectData = collectData = function(){
+      const {select,input} = getEls();
+      if(select && input && select.value !== '__other__') input.value = select.value || '';
+      const data = oldCollect();
+      if(data && data.fields && select && input){
+        data.fields.setter = select.value === '__other__' ? (input.value || '') : (select.value || '');
+      }
+      return data;
+    };
+  }
+  const oldApply = window.applyData;
+  if(typeof oldApply === 'function'){
+    window.applyData = applyData = function(data){
+      oldApply(data);
+      setTimeout(syncSetterSelectFromInput, 0);
+      setTimeout(syncSetterSelectFromInput, 80);
     };
   }
 })();
