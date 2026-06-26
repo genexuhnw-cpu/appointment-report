@@ -2917,7 +2917,17 @@ function clearForm(){
 }
 function normalizeCompanyForFile(raw){
   let company = String(raw || '').replace(/\s+/g, ' ').trim();
-  company = company.replace(/^บริษัท\s*/i, '').replace(/\s*จำกัด$/i, '').trim();
+  // วนตัดคำนำหน้า (บริษัท / ห้างหุ้นส่วนจำกัด / หจก.) และคำท้าย ((มหาชน) / จำกัด)
+  // พร้อมกันทุกรอบจนไม่มีอะไรให้ตัดอีก กันได้ทั้งกรณีพิมพ์ซ้ำหลายที ไม่ว่าจะซ้ำฝั่งหน้าหรือฝั่งท้าย
+  let prev;
+  do{
+    prev = company;
+    company = company
+      .replace(/^(บริษัท|ห้างหุ้นส่วนจำกัด|หจก\.?)\s*/i, '')
+      .replace(/\s*\(มหาชน\)\s*$/i, '')
+      .replace(/\s*จำกัด\s*$/i, '')
+      .trim();
+  }while(company !== prev);
   return company;
 }
 function sanitizeFilename(name){
@@ -4518,7 +4528,7 @@ window.addEventListener('beforeprint', ()=>{
       '<div class="pf-section"><div class="pf-section-title">ข้อมูลประกอบการนัดหมาย</div><table class="pf-info"><tbody><tr><td class="pf-label">ประเภทธุรกิจ</td><td class="pf-value">' + br(f.businessType) + '</td></tr></tbody></table><div class="pf-p"><strong>ประเด็นที่ลูกค้าสนใจ</strong>' + br(f.interests) + '</div><div class="pf-p"><strong>คำถามลูกค้า ระหว่างเจรจานัดหมาย</strong>' + br(f.questions) + '</div><div class="pf-p"><strong>บุคลิกภาพลูกค้าระหว่างสนทนา</strong>' + br(f.personality) + '</div></div>' +
       '<div class="pf-section"><div class="pf-section-title">การจัดเตรียมห้องประชุม</div><div class="pf-checks">' + roomTools + '</div></div>' +
       '<div class="pf-section"><div class="pf-section-title">การติดต่อประสานงาน</div>' + renderContacts(data.contacts) + '<div style="margin-top:3px">' + sent + '</div></div>' +
-      '<div class="pf-section"><div class="pf-section-title">รายละเอียดเพิ่มเติม</div><div class="pf-p"><strong>รายละเอียดอื่น ๆ เพิ่มเติม</strong>' + br(f.moreDetails) + '</div><div class="pf-p"><strong>เหตุผลที่คิดว่าบริษัทนี้จะเข้าโครงการ Corporate Policy <span style="font-weight:300">(ที่คิดว่าเคสนี้จะเป็นเบี้ยประกัน)</span></strong>' + renderReasons(data.reasons) + '</div><div class="pf-signatures"><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้รายงาน</div></div><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้ตรวจสอบ / ผู้อนุมัติ</div></div></div></div></div>';
+      '<div class="pf-section"><div class="pf-section-title">รายละเอียดเพิ่มเติม</div><div class="pf-p"><strong>รายละเอียดอื่น ๆ เพิ่มเติม</strong>' + br(f.otherDetails) + '</div><div class="pf-p"><strong>เหตุผลที่คิดว่าบริษัทนี้จะเข้าโครงการ Corporate Policy <span style="font-weight:300">(ที่คิดว่าเคสนี้จะเป็นเบี้ยประกัน)</span></strong>' + renderReasons(data.reasons) + '</div><div class="pf-signatures"><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้รายงาน</div></div><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้ตรวจสอบ / ผู้อนุมัติ</div></div></div></div></div>';
     document.body.classList.add('print-flow-v63');
     root.setAttribute('aria-hidden','false');
   }
@@ -4690,13 +4700,13 @@ window.addEventListener('beforeprint', ()=>{
     const top = infoRows(f);
     const noDirector = f.noDirectorAttend ? '<div class="pf-status">ไม่มีกรรมการเข้าร่วมรับฟัง</div>' : '';
     const peopleSec = '<div class="pf-section"><div class="pf-section-title">รายชื่อผู้เข้าพบ / ผู้ร่วมรับฟัง</div><div class="pf-summary"><span><b>บริษัทมีกรรมการ</b> ' + br(f.directorTotal) + ' ท่าน</span><span><b>กรรมการผู้เข้าร่วมรับฟัง</b> ' + br(f.directorAttend) + ' ท่าน</span></div>' + noDirector + renderPeople(data.people) + (f.accountingManagerJoined ? '<div class="pf-subtitle">ผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>' + renderPeople(data.accountingPeople) : '<div class="pf-status">ไม่มีผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>') + '</div>';
-    const dataSec1 = '<div class="pf-section"><div class="pf-section-title">ข้อมูลประกอบการนัดหมาย</div><table class="pf-info"><tbody><tr><td class="pf-label">ประเภทธุรกิจ</td><td class="pf-value">' + br(f.businessType) + '</td></tr></tbody></table><div class="pf-p"><strong>ประเด็นที่ลูกค้าสนใจ</strong>' + br(f.interests) + '</div><div class="pf-p"><strong>คำถามลูกค้า ระหว่างเจรจานัดหมาย</strong>' + br(f.questions) + '</div></div>';
-    const dataSec2 = '<div class="pf-section"><div class="pf-p"><strong>บุคลิกภาพลูกค้าระหว่างสนทนา</strong>' + br(f.personality) + '</div></div>';
+    const dataSec1 = '<div class="pf-section"><div class="pf-section-title">ข้อมูลประกอบการนัดหมาย</div><table class="pf-info"><tbody><tr><td class="pf-label">ประเภทธุรกิจ</td><td class="pf-value">' + br(f.businessType) + '</td></tr></tbody></table><div class="pf-p"><strong>ประเด็นที่ลูกค้าสนใจ</strong>' + br(f.interests) + '</div><div class="pf-p"><strong>คำถามลูกค้า ระหว่างเจรจานัดหมาย</strong>' + br(f.questions) + '</div><div class="pf-p"><strong>บุคลิกภาพลูกค้าระหว่างสนทนา</strong>' + br(f.personality) + '</div></div>';
     const roomTools = [mark(!!f.toolTv) + ' TV', mark(!!f.toolLcd) + ' LCD', mark(!!f.toolBringLcd) + ' ต้องนำ LCD ไปเอง'].join('&nbsp;&nbsp;&nbsp;');
     const roomSec = '<div class="pf-section"><div class="pf-section-title">การจัดเตรียมห้องประชุม</div><div class="pf-checks">' + roomTools + '</div></div>';
     const contactSec = '<div class="pf-section"><div class="pf-section-title">การติดต่อประสานงาน</div>' + renderContacts(data.contacts) + '<div style="margin-top:5px">' + mark(!!f.sentKeyPoint) + ' ส่งประเด็นสำคัญในการเข้าพบให้ลูกค้าแล้ว (อีเมล เอกสารแนะนำโครงการ)</div></div>';
-    const detailsSec = '<div class="pf-section"><div class="pf-section-title">รายละเอียดเพิ่มเติม</div><div class="pf-p"><strong>รายละเอียดอื่น ๆ เพิ่มเติม</strong>' + br(f.moreDetails) + '</div><div class="pf-p"><strong>เหตุผลที่คิดว่าบริษัทนี้จะเข้าโครงการ Corporate Policy <span style="font-weight:300">(ที่คิดว่าเคสนี้จะเป็นเบี้ยประกัน)</span></strong>' + renderReasons(data.reasons) + '</div><div class="pf-signatures"><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้รายงาน</div></div><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้ตรวจสอบ / ผู้อนุมัติ</div></div></div></div>';
-    const content = top.html + peopleSec + dataSec1 + dataSec2 + roomSec + contactSec + detailsSec;
+    const detailsSec = '<div class="pf-section"><div class="pf-section-title">รายละเอียดอื่น ๆ เพิ่มเติม</div><div class="pf-p">' + br(f.otherDetails) + '</div></div>' +
+      '<div class="pf-section"><div class="pf-section-title">เหตุผลที่คิดว่าบริษัทนี้จะเข้าโครงการ Corporate Policy <span style="font-size:9pt;font-weight:300">(ที่คิดว่าเคสนี้จะเป็นเบี้ยประกัน)</span></div>' + renderReasons(data.reasons) + '<div class="pf-signatures"><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้รายงาน</div></div><div><div class="pf-sign-space"></div><div>(................................................)</div><div>ผู้ตรวจสอบ / ผู้อนุมัติ</div></div></div></div>';
+    const content = top.html + peopleSec + dataSec1 + roomSec + contactSec + detailsSec;
     root.innerHTML = '<div class="pf-doc-v65">' + page(content,top.reportDate) + '</div>';
     root.setAttribute('aria-hidden','false');
     document.body.classList.remove('print-flow-v63');
