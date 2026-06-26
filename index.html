@@ -4590,7 +4590,7 @@ window.addEventListener('beforeprint', ()=>{
   body.print-flow-v65 .pf-info td{vertical-align:top!important;padding:3px 4px 3px 0!important;line-height:1.35!important;}
   body.print-flow-v65 .pf-label{font-weight:800!important;color:#344054!important;white-space:nowrap!important;width:24mm!important;}
   body.print-flow-v65 .pf-value{font-weight:300!important;color:#111!important;white-space:pre-wrap!important;overflow-wrap:break-word!important;word-break:normal!important;}
-  body.highlight-important.print-flow-v65 .pf-hl{background:#fff7e6!important;box-shadow:inset 0 -1px 0 rgba(181,141,59,.42)!important;border-radius:3px!important;}
+  body.highlight-important.print-flow-v65 .pf-hl{display:inline;background:#fff7e6!important;box-shadow:inset 0 -1px 0 rgba(181,141,59,.42)!important;border-radius:2px!important;padding:0 2px!important;}
   body.print-flow-v65 .pf-section{margin-top:14px!important;padding-top:16px!important;border-top:1px solid #d9dee8!important;break-inside:auto!important;page-break-inside:auto!important;}
   body.print-flow-v65 .pf-section:first-of-type{margin-top:8px!important;}
   body.print-flow-v65 .pf-section-title{font-size:12pt!important;font-weight:800!important;color:#14284b!important;margin:0 0 6px 0!important;line-height:1.3!important;break-after:avoid!important;page-break-after:avoid!important;}
@@ -4646,9 +4646,8 @@ window.addEventListener('beforeprint', ()=>{
   function e(v){ return String(v ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
   function br(v){ return e(h(v)).replace(/\n/g,'<br>'); }
   function mark(v){ return v ? '☑' : '☐'; }
-  function hlClass(base, on){
-    if(!on) return base || '';
-    return base ? (base + ' pf-hl') : 'pf-hl';
+  function hlWrap(html, on){
+    return on ? ('<span class="pf-hl">' + html + '</span>') : html;
   }
   function decision(v){ return v === 'มี' ? '☑ มี&nbsp;&nbsp;☐ ไม่มี' : (v === 'ไม่มี' ? '☐ มี&nbsp;&nbsp;☑ ไม่มี' : '☐ มี&nbsp;&nbsp;☐ ไม่มี'); }
   function thai(iso){ try{ return (typeof thaiFullDateFromIso === 'function' ? thaiFullDateFromIso(iso) : '') || ''; }catch(e){ return ''; } }
@@ -4665,13 +4664,13 @@ window.addEventListener('beforeprint', ()=>{
     const rows = (list || []).map(normalizePerson).filter(p => [p.name,p.role,p.age,p.decision].some(Boolean));
     if(!rows.length) return '<div class="pf-status">-</div>';
     return '<table class="pf-people"><thead><tr><th class="pf-num"></th><th class="pf-name">ชื่อ-นามสกุล</th><th class="pf-role">ตำแหน่ง</th><th class="pf-age">อายุ</th><th class="pf-decision">อำนาจตัดสินใจ</th></tr></thead><tbody>' + rows.map((p,i)=>
-      '<tr><td class="pf-num">' + (i+1) + '.</td><td class="' + hlClass('pf-name',hlOn) + '">' + e(h(p.name)) + '</td><td class="' + hlClass('pf-role',hlOn) + '">' + e(h(p.role)) + '</td><td class="' + hlClass('pf-age',hlOn) + '">' + e(stripAge(p.age)) + '</td><td class="pf-decision">' + decision(p.decision) + '</td></tr>'
+      '<tr><td class="pf-num">' + (i+1) + '.</td><td class="pf-name">' + hlWrap(e(h(p.name)),hlOn) + '</td><td class="pf-role">' + hlWrap(e(h(p.role)),hlOn) + '</td><td class="pf-age">' + hlWrap(e(stripAge(p.age)),hlOn) + '</td><td class="pf-decision">' + decision(p.decision) + '</td></tr>'
     ).join('') + '</tbody></table>';
   }
   function renderContacts(list, hlOn){
     const rows = (list || []).map(c=>({name:clean(c && c.name), phone:clean(c && c.phone)})).filter(c => c.name || c.phone);
     if(!rows.length) return '<div class="pf-status">-</div>';
-    return '<table class="pf-contact"><thead><tr><th>ชื่อผู้ติดต่อประสานงาน</th><th style="width:48mm">เบอร์โทร</th></tr></thead><tbody>' + rows.map(c => '<tr><td class="' + hlClass('',hlOn) + '">' + br(c.name) + '</td><td class="' + hlClass('',hlOn) + '">' + br(c.phone) + '</td></tr>').join('') + '</tbody></table>';
+    return '<table class="pf-contact"><thead><tr><th>ชื่อผู้ติดต่อประสานงาน</th><th style="width:48mm">เบอร์โทร</th></tr></thead><tbody>' + rows.map(c => '<tr><td>' + hlWrap(br(c.name),hlOn) + '</td><td>' + hlWrap(br(c.phone),hlOn) + '</td></tr>').join('') + '</tbody></table>';
   }
   function renderReasons(list){
     const rows = (list || []).map(r=>({text:clean(r && r.text)})).filter((r,i)=> i === 0 || r.text);
@@ -4684,10 +4683,10 @@ window.addEventListener('beforeprint', ()=>{
     return {
       reportDate,
       html: '<table class="pf-info"><colgroup><col style="width:25mm"><col><col style="width:28mm"><col style="width:50mm"></colgroup><tbody>' +
-        '<tr><td class="pf-label">บริษัท</td><td class="' + hlClass('pf-value',hlOn) + '">' + br(f.company) + '</td><td class="pf-label">เข้าโครงการได้</td><td class="' + hlClass('pf-value',hlOn) + '">' + br(f.projectAmount) + '</td></tr>' +
+        '<tr><td class="pf-label">บริษัท</td><td class="pf-value">' + hlWrap(br(f.company),hlOn) + '</td><td class="pf-label">เข้าโครงการได้</td><td class="pf-value">' + hlWrap(br(f.projectAmount),hlOn) + '</td></tr>' +
         '<tr><td class="pf-label">ผู้นัดหมาย</td><td class="pf-value">' + br(f.setter) + '</td><td class="pf-label">ผู้นำเสนอ</td><td class="pf-value">' + br(f.presenter) + '</td></tr>' +
-        '<tr><td class="pf-label">วันนัดหมาย</td><td class="' + hlClass('pf-value',hlOn) + '">' + e(appointmentDate) + '</td><td class="pf-label">เวลา</td><td class="' + hlClass('pf-value',hlOn) + '">' + br(f.appointmentTime) + '</td></tr>' +
-        '<tr><td class="pf-label">สถานที่เข้าพบ</td><td class="' + hlClass('pf-value',hlOn) + '" colspan="3">' + br(f.location) + '</td></tr>' +
+        '<tr><td class="pf-label">วันนัดหมาย</td><td class="pf-value">' + hlWrap(e(appointmentDate),hlOn) + '</td><td class="pf-label">เวลา</td><td class="pf-value">' + hlWrap(br(f.appointmentTime),hlOn) + '</td></tr>' +
+        '<tr><td class="pf-label">สถานที่เข้าพบ</td><td class="pf-value" colspan="3">' + hlWrap(br(f.location),hlOn) + '</td></tr>' +
       '</tbody></table>'
     };
   }
@@ -4704,8 +4703,8 @@ window.addEventListener('beforeprint', ()=>{
     Object.keys(f).forEach(k=>{ if(typeof f[k] === 'string') f[k] = clean(f[k]); });
     const hlOn = document.body.classList.contains('highlight-important');
     const top = infoRows(f, hlOn);
-    const noDirector = f.noDirectorAttend ? '<div class="' + hlClass('pf-status',hlOn) + '">ไม่มีกรรมการเข้าร่วมรับฟัง</div>' : '';
-    const peopleSec = '<div class="pf-section"><div class="pf-section-title">รายชื่อผู้เข้าพบ / ผู้ร่วมรับฟัง</div><div class="pf-summary"><span><b>บริษัทมีกรรมการ</b> ' + br(f.directorTotal) + ' ท่าน</span><span><b>กรรมการผู้เข้าร่วมรับฟัง</b> ' + br(f.directorAttend) + ' ท่าน</span></div>' + noDirector + renderPeople(data.people, hlOn) + (f.accountingManagerJoined ? '<div class="pf-subtitle">ผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>' + renderPeople(data.accountingPeople, hlOn) : '<div class="' + hlClass('pf-status',hlOn) + '">ไม่มีผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>') + '</div>';
+    const noDirector = f.noDirectorAttend ? '<div class="pf-status">' + hlWrap('ไม่มีกรรมการเข้าร่วมรับฟัง',hlOn) + '</div>' : '';
+    const peopleSec = '<div class="pf-section"><div class="pf-section-title">รายชื่อผู้เข้าพบ / ผู้ร่วมรับฟัง</div><div class="pf-summary"><span><b>บริษัทมีกรรมการ</b> ' + br(f.directorTotal) + ' ท่าน</span><span><b>กรรมการผู้เข้าร่วมรับฟัง</b> ' + br(f.directorAttend) + ' ท่าน</span></div>' + noDirector + renderPeople(data.people, hlOn) + (f.accountingManagerJoined ? '<div class="pf-subtitle">ผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง</div>' + renderPeople(data.accountingPeople, hlOn) : '<div class="pf-status">' + hlWrap('ไม่มีผู้จัดการฝ่ายบัญชี/การเงินเข้าร่วมรับฟัง',hlOn) + '</div>') + '</div>';
     const dataSec1 = '<div class="pf-section"><div class="pf-section-title">ข้อมูลประกอบการนัดหมาย</div><table class="pf-info"><tbody><tr><td class="pf-label">ประเภทธุรกิจ</td><td class="pf-value">' + br(f.businessType) + '</td></tr></tbody></table><div class="pf-p"><strong>ประเด็นที่ลูกค้าสนใจ</strong>' + br(f.interests) + '</div><div class="pf-p"><strong>คำถามลูกค้า ระหว่างเจรจานัดหมาย</strong>' + br(f.questions) + '</div><div class="pf-p"><strong>บุคลิกภาพลูกค้าระหว่างสนทนา</strong>' + br(f.personality) + '</div></div>';
     const roomTools = [mark(!!f.toolTv) + ' TV', mark(!!f.toolLcd) + ' LCD', mark(!!f.toolBringLcd) + ' ต้องนำ LCD ไปเอง'].join('&nbsp;&nbsp;&nbsp;');
     const roomSec = '<div class="pf-section"><div class="pf-section-title">การจัดเตรียมห้องประชุม</div><div class="pf-checks">' + roomTools + '</div></div>';
