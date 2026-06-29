@@ -3828,6 +3828,41 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
 }
 </style>
 
+
+
+<!-- v75: screen-only smooth highlight fix. Keep print/PDF behavior unchanged. -->
+<style id="v75-screen-smooth-full-highlight-fix">
+@media screen{
+  body.highlight-important:not(.print-highlight-mode) .important-field,
+  body.highlight-important:not(.print-highlight-mode) .print-status.important-field{
+    background:#fff0bd!important;
+    background-color:#fff0bd!important;
+    background-image:none!important;
+    background-repeat:no-repeat!important;
+    background-size:auto!important;
+    background-position:0 0!important;
+    box-shadow:none!important;
+    outline:0!important;
+    border-radius:0!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  body.highlight-important:not(.print-highlight-mode) .important-field:focus{
+    background:#fff0bd!important;
+    background-color:#fff0bd!important;
+    background-image:none!important;
+    box-shadow:none!important;
+    outline:0!important;
+    border-radius:0!important;
+  }
+  body.highlight-important:not(.print-highlight-mode) .print-highlight-wrap .important-field{
+    background:#fff0bd!important;
+    background-color:#fff0bd!important;
+    background-image:none!important;
+  }
+}
+</style>
+
 </body></html>`;
 }
 
@@ -5744,5 +5779,73 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
 }
 </style>
 
+
+
+<!-- v76: final screen highlight + closer contact phone column in print/PDF -->
+<style id="v76-contact-and-screen-highlight-final-fix">
+/* 1) Screen only: make important highlight ONE continuous marker band, not repeated stripes. */
+@media screen{
+  body.highlight-important:not(.print-highlight-mode) .important-field,
+  body.highlight-important:not(.print-highlight-mode) .print-status.important-field,
+  body.highlight-important:not(.print-highlight-mode) .print-highlight-wrap .important-field{
+    background:#fff0bd!important;
+    background-color:#fff0bd!important;
+    background-image:none!important;
+    background-repeat:no-repeat!important;
+    background-size:100% 100%!important;
+    background-position:0 0!important;
+    box-shadow:none!important;
+    outline:0!important;
+    border-radius:0!important;
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important;
+  }
+  body.highlight-important:not(.print-highlight-mode) .important-field:focus,
+  body.highlight-important:not(.print-highlight-mode) .print-highlight-wrap .important-field:focus{
+    background:#fff0bd!important;
+    background-color:#fff0bd!important;
+    background-image:none!important;
+    box-shadow:0 0 0 2px rgba(16,42,85,.08)!important;
+    outline:0!important;
+    border-radius:0!important;
+  }
+}
+
+/* 2) Print/PDF: pull the coordinator phone column closer to the contact name. */
+@media print{
+  body.print-flow-v65 .pf-contact,
+  body.print-flow-v63 .pf-contact{
+    width:102mm!important;
+    max-width:102mm!important;
+    table-layout:fixed!important;
+    margin-left:0!important;
+    margin-right:auto!important;
+  }
+  body.print-flow-v65 .pf-contact th:nth-child(1),
+  body.print-flow-v65 .pf-contact td:nth-child(1),
+  body.print-flow-v63 .pf-contact th:nth-child(1),
+  body.print-flow-v63 .pf-contact td:nth-child(1){
+    width:65mm!important;
+    max-width:65mm!important;
+    padding-right:4mm!important;
+  }
+  body.print-flow-v65 .pf-contact th:nth-child(2),
+  body.print-flow-v65 .pf-contact td:nth-child(2),
+  body.print-flow-v63 .pf-contact th:nth-child(2),
+  body.print-flow-v63 .pf-contact td:nth-child(2){
+    width:33mm!important;
+    max-width:33mm!important;
+  }
+
+  /* Fallback for the normal A4 print layout if the browser uses the original form instead of print-flow. */
+  .contact-head,
+  .contact-row,
+  body.print-compact-layout .contact-head,
+  body.print-compact-layout .contact-row{
+    grid-template-columns:64mm 33mm!important;
+    gap:1.5mm!important;
+  }
+}
+</style>
 </body>
 </html>
