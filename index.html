@@ -4552,7 +4552,7 @@ window.addEventListener('beforeprint', ()=>{
     root.innerHTML = '<div class="pf-doc"><div class="pf-fixed-footer"></div>' +
       '<div class="pf-header"><div class="pf-title">รายงานนัดหมาย</div><div class="pf-date"><b>วันที่รายงาน</b>' + e(reportDate) + '</div></div>' +
       '<table class="pf-info"><colgroup><col style="width:25mm"><col><col style="width:27mm"><col style="width:48mm"></colgroup><tbody>' +
-        '<tr><td class="pf-label">บริษัท</td><td class="pf-value">' + br(f.company) + '</td><td class="pf-label">เข้าโครงการได้ 20%</td><td class="pf-value">' + br(f.projectAmount) + '</td></tr>' +
+        '<tr><td class="pf-label">บริษัท</td><td class="pf-value">' + br(f.company) + '</td><td class="pf-label pf-project-label">เข้าโครงการได้ 20%</td><td class="pf-value">' + br(f.projectAmount) + '</td></tr>' +
         '<tr><td class="pf-label">ผู้นัดหมาย</td><td class="pf-value">' + br(f.setter) + '</td><td class="pf-label">ผู้นำเสนอ</td><td class="pf-value">' + br(f.presenter) + '</td></tr>' +
         '<tr><td class="pf-label">วันนัดหมาย</td><td class="pf-value">' + e(appointmentDate) + '</td><td class="pf-label">เวลา</td><td class="pf-value">' + br(f.appointmentTime) + '</td></tr>' +
         '<tr><td class="pf-label">สถานที่เข้าพบ</td><td class="pf-value" colspan="3">' + br(f.location) + '</td></tr>' +
@@ -4715,8 +4715,8 @@ window.addEventListener('beforeprint', ()=>{
     const appointmentDate = thai(f.appointmentDate) || h(f.appointmentDate);
     return {
       reportDate,
-      html: '<table class="pf-info"><colgroup><col style="width:25mm"><col><col style="width:28mm"><col style="width:50mm"></colgroup><tbody>' +
-        '<tr><td class="pf-label">บริษัท</td><td class="pf-value">' + hlWrap(br(f.company),hlOn) + '</td><td class="pf-label">เข้าโครงการได้ 20%</td><td class="pf-value">' + hlWrap(br(f.projectAmount),hlOn) + '</td></tr>' +
+      html: '<table class="pf-info"><colgroup><col style="width:25mm"><col><col style="width:34mm"><col style="width:48mm"></colgroup><tbody>' +
+        '<tr><td class="pf-label">บริษัท</td><td class="pf-value">' + hlWrap(br(f.company),hlOn) + '</td><td class="pf-label pf-project-label">เข้าโครงการได้ 20%</td><td class="pf-value">' + hlWrap(br(f.projectAmount),hlOn) + '</td></tr>' +
         '<tr><td class="pf-label">ผู้นัดหมาย</td><td class="pf-value">' + br(f.setter) + '</td><td class="pf-label">ผู้นำเสนอ</td><td class="pf-value">' + br(f.presenter) + '</td></tr>' +
         '<tr><td class="pf-label">วันนัดหมาย</td><td class="pf-value">' + hlWrap(e(appointmentDate),hlOn) + '</td><td class="pf-label">เวลา</td><td class="pf-value">' + hlWrap(br(f.appointmentTime),hlOn) + '</td></tr>' +
         '<tr><td class="pf-label">สถานที่เข้าพบ</td><td class="pf-value" colspan="3">' + hlWrap(br(f.location),hlOn) + '</td></tr>' +
@@ -5381,6 +5381,60 @@ window.addEventListener('beforeprint', ()=>{
   }
 })();
 </script>
+
+
+<style id="v71-project-amount-spacing-print-fix">
+/* v71: แก้ label "เข้าโครงการได้ 20%" ตอนพิมพ์/PDF ไม่ให้โดนตัด และขยับช่องจำนวนเงินให้ใกล้ label มากขึ้น */
+.form-grid.first-info{
+  grid-template-columns:24mm minmax(0,1.20fr) 32mm minmax(38mm,.90fr)!important;
+  column-gap:4px!important;
+}
+.project-amount-label{
+  white-space:nowrap!important;
+  font-size:9.3pt!important;
+  line-height:1.18!important;
+  padding-right:0!important;
+}
+.amount-input{
+  min-width:38mm!important;
+}
+@media print{
+  .form-grid.first-info{
+    grid-template-columns:24mm minmax(0,1.20fr) 33mm minmax(38mm,.90fr)!important;
+    column-gap:4px!important;
+  }
+  .project-amount-label{
+    white-space:nowrap!important;
+    font-size:8.9pt!important;
+    line-height:1.18!important;
+    overflow:visible!important;
+    padding-right:0!important;
+  }
+  .amount-input{min-width:38mm!important;}
+  body.print-compact-layout .project-amount-label{
+    font-size:8.0pt!important;
+  }
+  body.print-flow-v63 .pf-project-label,
+  body.print-flow-v65 .pf-project-label{
+    width:34mm!important;
+    min-width:34mm!important;
+    max-width:34mm!important;
+    white-space:nowrap!important;
+    font-size:8.7pt!important;
+    line-height:1.18!important;
+    overflow:visible!important;
+  }
+  body.print-flow-v63 .pf-info col:nth-child(3),
+  body.print-flow-v65 .pf-info col:nth-child(3){width:34mm!important;}
+  body.print-flow-v63 .pf-info col:nth-child(4),
+  body.print-flow-v65 .pf-info col:nth-child(4){width:48mm!important;}
+}
+@media screen and (max-width:820px){
+  .form-grid.first-info{grid-template-columns:1fr!important;column-gap:0!important;}
+  .project-amount-label{white-space:normal!important;font-size:14px!important;}
+  .amount-input{min-width:0!important;}
+}
+</style>
 
 </body>
 </html>
