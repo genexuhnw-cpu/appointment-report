@@ -2144,7 +2144,7 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
         <div class="form-grid first-info">
           <div class="label">บริษัท</div>
           <input data-key="company" class="input important-field" placeholder="กรอกชื่อบริษัท">
-          <div class="label">เข้าโครงการได้ 20%</div>
+          <div class="label project-amount-label">เข้าโครงการได้ 20%</div>
           <input data-key="projectAmount" class="input amount-input important-field" inputmode="numeric" autocomplete="off" placeholder="เช่น 5,000,000">
           <div class="label">ผู้นัดหมาย</div>
           <div class="setter-field-wrap">
@@ -2158,7 +2158,7 @@ body.highlight-important.print-highlight-mode .print-highlight-wrap.mirror-multi
             <input id="setterOtherInput" data-key="setter" class="input setter-other-input" placeholder="กรอกชื่อผู้นัดหมายเอง">
           </div>
           <div class="label">ผู้นำเสนอ</div>
-          <input data-key="presenter" class="input" placeholder="ชื่อผู้นำเสนอ">
+          <input data-key="presenter" class="input" value="คุณจิรสุดา" placeholder="ชื่อผู้นำเสนอ">
           <div class="label">วันนัดหมาย</div>
           <div class="thai-date-field date-select-field">
             <input id="appointmentDatePicker" data-key="appointmentDate" type="hidden" class="native-date-hidden">
@@ -5242,6 +5242,143 @@ window.addEventListener('beforeprint', ()=>{
   window.addEventListener('pageshow',init);
   setTimeout(init,80); setTimeout(init,500);
   window.v69RepairDateDropdowns=init;
+})();
+</script>
+
+
+
+<style id="v70-project-label-presenter-setter-style">
+/* v70: กันข้อความ "เข้าโครงการได้ 20%" ถูกตัด โดยเพิ่มพื้นที่ label และลดช่องจำนวนเงินลงเล็กน้อย */
+.form-grid.first-info{
+  grid-template-columns:24mm minmax(0,1.32fr) 38mm minmax(30mm,.68fr)!important;
+}
+.project-amount-label{
+  white-space:normal!important;
+  line-height:1.22!important;
+  overflow:visible!important;
+}
+@media print{
+  .form-grid.first-info{
+    grid-template-columns:24mm minmax(0,1.32fr) 38mm minmax(30mm,.68fr)!important;
+  }
+  .project-amount-label{
+    white-space:nowrap!important;
+    font-size:9.2pt!important;
+    line-height:1.20!important;
+  }
+  body.print-compact-layout .project-amount-label{
+    font-size:8.1pt!important;
+  }
+}
+@media screen and (max-width:820px){
+  .form-grid.first-info{grid-template-columns:1fr!important;}
+  .project-amount-label{white-space:normal!important;font-size:14px!important;}
+}
+</style>
+<script id="v70-project-label-presenter-setter-script">
+(function(){
+  const DEFAULT_PRESENTER = 'คุณจิรสุดา';
+  const REMOVED_SETTER_KEYWORDS = ['วรวรรณ'];
+  const ACTIVE_SETTERS = ['ราณี (ต่าย)','ชนิดาภา (เทียน)','ณัฐวรรณ (อีฟ)'];
+  function q(sel, root){ return (root || document).querySelector(sel); }
+  function qa(sel, root){ return Array.from((root || document).querySelectorAll(sel)); }
+  function fire(el){
+    if(!el) return;
+    try{ el.dispatchEvent(new Event('input', {bubbles:true})); }catch(e){}
+    try{ el.dispatchEvent(new Event('change', {bubbles:true})); }catch(e){}
+  }
+  function isRemovedSetter(value){
+    const text = String(value || '').trim();
+    return REMOVED_SETTER_KEYWORDS.some(k => text.includes(k));
+  }
+  function sanitizeSetterDropdown(){
+    const select = q('#setterSelect');
+    const input = q('#setterOtherInput') || q('[data-key="setter"]');
+    if(select){
+      qa('option', select).forEach(opt=>{
+        if(isRemovedSetter(opt.value) || isRemovedSetter(opt.textContent)) opt.remove();
+      });
+      const current = select.value;
+      const optionList = qa('option', select);
+      const hasOther = !!optionList.find(o=>o.value === '__other__');
+      const first = optionList.find(o=>o.value === '');
+      const presetValues = new Set(optionList.map(o=>o.value));
+      ACTIVE_SETTERS.forEach(name=>{
+        if(!presetValues.has(name)){
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          const other = qa('option', select).find(o=>o.value === '__other__');
+          if(other){ select.insertBefore(opt, other); }
+          else{ select.appendChild(opt); }
+        }
+      });
+      if(first && select.firstElementChild !== first) select.insertBefore(first, select.firstElementChild);
+      const other = qa('option', select).find(o=>o.value === '__other__');
+      if(other) select.appendChild(other);
+      if(isRemovedSetter(current)) select.value = '';
+    }
+    if(input && isRemovedSetter(input.value)){
+      input.value = '';
+      fire(input);
+    }
+  }
+  function setDefaultPresenterIfBlank(){
+    const el = q('[data-key="presenter"]');
+    if(!el) return;
+    if(!String(el.value || '').trim()){
+      el.value = DEFAULT_PRESENTER;
+      fire(el);
+      try{ if(typeof syncMirrors === 'function') syncMirrors(); }catch(e){}
+    }
+  }
+  function initV70(){
+    sanitizeSetterDropdown();
+    setDefaultPresenterIfBlank();
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initV70);
+  initV70();
+  setTimeout(initV70, 0);
+  setTimeout(initV70, 250);
+
+  const oldClearForm = window.clearForm;
+  if(typeof oldClearForm === 'function' && !oldClearForm.__v70Wrapped){
+    const wrapped = function(){
+      const result = oldClearForm.apply(this, arguments);
+      setTimeout(()=>{ sanitizeSetterDropdown(); setDefaultPresenterIfBlank(); }, 0);
+      return result;
+    };
+    wrapped.__v70Wrapped = true;
+    window.clearForm = clearForm = wrapped;
+  }
+  const oldApplyData = window.applyData;
+  if(typeof oldApplyData === 'function' && !oldApplyData.__v70Wrapped){
+    const wrappedApply = function(data){
+      if(data && data.fields){
+        if(isRemovedSetter(data.fields.setter)) data.fields.setter = '';
+      }
+      const result = oldApplyData.apply(this, arguments);
+      setTimeout(()=>{ sanitizeSetterDropdown(); setDefaultPresenterIfBlank(); }, 0);
+      return result;
+    };
+    wrappedApply.__v70Wrapped = true;
+    window.applyData = applyData = wrappedApply;
+  }
+  const oldCollectData = window.collectData;
+  if(typeof oldCollectData === 'function' && !oldCollectData.__v70Wrapped){
+    const wrappedCollect = function(){
+      sanitizeSetterDropdown();
+      setDefaultPresenterIfBlank();
+      const data = oldCollectData.apply(this, arguments);
+      if(data && data.fields){
+        if(isRemovedSetter(data.fields.setter)) data.fields.setter = '';
+        if(!String(data.fields.presenter || '').trim()) data.fields.presenter = DEFAULT_PRESENTER;
+      }
+      return data;
+    };
+    wrappedCollect.__v70Wrapped = true;
+    window.collectData = collectData = wrappedCollect;
+  }
 })();
 </script>
 
